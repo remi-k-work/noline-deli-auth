@@ -5,8 +5,10 @@ import "dotenv/config";
 
 // hono
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 
 // openauth
+import type { Theme } from "@openauthjs/openauth/ui/theme";
 import { issuer } from "@openauthjs/openauth";
 import { CodeProvider } from "@openauthjs/openauth/provider/code";
 import { CodeUI } from "@openauthjs/openauth/ui/code";
@@ -17,6 +19,14 @@ import { PasswordUI } from "@openauthjs/openauth/ui/password";
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
 
+const MY_THEME: Theme = {
+  title: "NoLine-Deli",
+  favicon: "/favicon.svg",
+  radius: "lg",
+  primary: { dark: "#fcf9fa", light: "#0f172b" },
+  logo: "/favicon.svg",
+};
+
 // Either get the existing customer id or create a new one
 async function getOrCreateCustomerId(customerEmail: string) {
   // Get user from database
@@ -26,6 +36,7 @@ async function getOrCreateCustomerId(customerEmail: string) {
 
 // The "issuer" creates an openauth server, a portable hono application
 const app = issuer({
+  theme: MY_THEME,
   subjects,
   storage: PostgresStorage(),
 
@@ -78,6 +89,26 @@ const app = issuer({
     return subject("customer", { customerId });
   },
 });
+
+// Serve static files from the local file system
+app.use("*", serveStatic({ root: "./public" }));
+
+const View = () => {
+  return (
+    <html>
+      <head>
+        <title>NoLine-Deli</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <img src="/logo.png" alt="logo" width={1024} height={1024} style={{ objectFit: "contain", maxWidth: "100%", height: "auto" }} />
+      </body>
+    </html>
+  );
+};
+
+app.get("/", (c) => c.html(<View />));
 
 // Determine how to run the server based on whether it is in production or not
 if (process.env.DATABASE_URL?.includes("localhost"))

@@ -1,9 +1,10 @@
+import { jsx as _jsx, jsxs as _jsxs } from "hono/jsx/jsx-runtime";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Load environment variables
 import "dotenv/config";
 // hono
 import { serve } from "@hono/node-server";
-// openauth
+import { serveStatic } from "@hono/node-server/serve-static";
 import { issuer } from "@openauthjs/openauth";
 import { CodeProvider } from "@openauthjs/openauth/provider/code";
 import { CodeUI } from "@openauthjs/openauth/ui/code";
@@ -12,6 +13,13 @@ import { PasswordUI } from "@openauthjs/openauth/ui/password";
 // other libraries
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
+const MY_THEME = {
+    title: "NoLine-Deli",
+    favicon: "/favicon.svg",
+    radius: "lg",
+    primary: { dark: "#fcf9fa", light: "#0f172b" },
+    logo: "/favicon.svg",
+};
 // Either get the existing customer id or create a new one
 async function getOrCreateCustomerId(customerEmail) {
     // Get user from database
@@ -20,6 +28,7 @@ async function getOrCreateCustomerId(customerEmail) {
 }
 // The "issuer" creates an openauth server, a portable hono application
 const app = issuer({
+    theme: MY_THEME,
     subjects,
     storage: PostgresStorage(),
     // Auth providers we are going to use
@@ -59,6 +68,12 @@ const app = issuer({
         return subject("customer", { customerId });
     },
 });
+// Serve static files from the local file system
+app.use("*", serveStatic({ root: "./public" }));
+const View = () => {
+    return (_jsxs("html", { children: [_jsxs("head", { children: [_jsx("title", { children: "NoLine-Deli" }), _jsx("meta", { charset: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" })] }), _jsx("body", { style: { display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }, children: _jsx("img", { src: "/logo.png", alt: "logo", width: 1024, height: 1024, style: { objectFit: "contain", maxWidth: "100%", height: "auto" } }) })] }));
+};
+app.get("/", (c) => c.html(_jsx(View, {})));
 // Determine how to run the server based on whether it is in production or not
 if (process.env.DATABASE_URL?.includes("localhost"))
     serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
