@@ -10,10 +10,7 @@
     {
       "src": "/(.*)",
       "dest": "dist/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
     }
-  ]
+  ],
+  "outputDirectory": "dist"
 }
