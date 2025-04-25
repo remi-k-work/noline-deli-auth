@@ -4,5 +4,8 @@
     { "src": "dist/index.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
-  "routes": [{ "src": "/(.*)", "dest": "dist/index.js" }]
+  "routes": [
+    { "src": "/(.+)", "dest": "public/$1" },
+    { "src": "/(.*)", "dest": "dist/index.js" }
+  ]
 }
