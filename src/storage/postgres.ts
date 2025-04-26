@@ -6,8 +6,10 @@ import { joinKey, splitKey, type StorageAdapter } from "@openauthjs/openauth/sto
 // other libraries
 import { Pool } from "pg";
 
-// Connect on module load
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+// Connect on module load (use ssl connection to the postgres server in production only)
+const pool = process.env.DATABASE_URL?.includes("localhost")
+  ? new Pool({ connectionString: process.env.DATABASE_URL })
+  : new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 
 export default function PostgresStorage(): StorageAdapter {
   return {
@@ -17,7 +19,9 @@ export default function PostgresStorage(): StorageAdapter {
       const client = await pool.connect();
       try {
         const result = await client.query("SELECT value FROM openauth_storage WHERE key = $1 AND (expiry IS NULL OR expiry > NOW())", [key]);
-        return result.rows[0]?.value;
+
+        // Access the nested 'value' directly
+        return result.rows[0]?.value?.value;
       } catch (error) {
         console.error("Error getting key from PostgreSQL", error);
         throw error;
@@ -31,9 +35,10 @@ export default function PostgresStorage(): StorageAdapter {
 
       const client = await pool.connect();
       try {
+        // Always stringify an object containing the value
         await client.query(
           "INSERT INTO openauth_storage (key, value, expiry) VALUES ($1, $2::jsonb, $3) ON CONFLICT (key) DO UPDATE SET value = $2::jsonb, expiry = $3",
-          [key, JSON.stringify(value), expiry],
+          [key, JSON.stringify({ value }), expiry],
         );
       } catch (error) {
         console.error("Error setting key in PostgreSQL", error);
@@ -67,7 +72,8 @@ export default function PostgresStorage(): StorageAdapter {
         ]);
 
         for (const row of result.rows) {
-          yield [splitKey(row.key), row.value];
+          // Access the nested 'value' directly
+          yield [splitKey(row.key), row.value?.value];
         }
       } catch (error) {
         console.error("Error scanning keys in PostgreSQL", error);

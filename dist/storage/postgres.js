@@ -3,8 +3,10 @@
 import { joinKey, splitKey } from "@openauthjs/openauth/storage/storage";
 // other libraries
 import { Pool } from "pg";
-// Connect on module load
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+// Connect on module load (use ssl connection to the postgres server in production only)
+const pool = process.env.DATABASE_URL?.includes("localhost")
+    ? new Pool({ connectionString: process.env.DATABASE_URL })
+    : new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 export default function PostgresStorage() {
     return {
         async get(keyParts) {
@@ -12,7 +14,8 @@ export default function PostgresStorage() {
             const client = await pool.connect();
             try {
                 const result = await client.query("SELECT value FROM openauth_storage WHERE key = $1 AND (expiry IS NULL OR expiry > NOW())", [key]);
-                return result.rows[0]?.value;
+                // Access the nested 'value' directly
+                return result.rows[0]?.value?.value;
             }
             catch (error) {
                 console.error("Error getting key from PostgreSQL", error);
@@ -26,7 +29,8 @@ export default function PostgresStorage() {
             const key = joinKey(keyParts);
             const client = await pool.connect();
             try {
-                await client.query("INSERT INTO openauth_storage (key, value, expiry) VALUES ($1, $2::jsonb, $3) ON CONFLICT (key) DO UPDATE SET value = $2::jsonb, expiry = $3", [key, JSON.stringify(value), expiry]);
+                // Always stringify an object containing the value
+                await client.query("INSERT INTO openauth_storage (key, value, expiry) VALUES ($1, $2::jsonb, $3) ON CONFLICT (key) DO UPDATE SET value = $2::jsonb, expiry = $3", [key, JSON.stringify({ value }), expiry]);
             }
             catch (error) {
                 console.error("Error setting key in PostgreSQL", error);
@@ -58,7 +62,8 @@ export default function PostgresStorage() {
                     `${prefix}${String.fromCharCode(0x1f)}%`,
                 ]);
                 for (const row of result.rows) {
-                    yield [splitKey(row.key), row.value];
+                    // Access the nested 'value' directly
+                    yield [splitKey(row.key), row.value?.value];
                 }
             }
             catch (error) {
