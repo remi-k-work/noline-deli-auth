@@ -29,8 +29,7 @@ export default function PostgresStorage() {
             const key = joinKey(keyParts);
             const client = await pool.connect();
             try {
-                // Always stringify an object containing the value
-                await client.query("INSERT INTO openauth_storage (key, value, expiry) VALUES ($1, $2::jsonb, $3) ON CONFLICT (key) DO UPDATE SET value = $2::jsonb, expiry = $3", [key, JSON.stringify({ value }), expiry]);
+                await client.query("INSERT INTO openauth_storage (key, value, expiry) VALUES ($1, $2::jsonb, $3) ON CONFLICT (key) DO UPDATE SET value = $2::jsonb, expiry = $3", [key, { value }, expiry]);
             }
             catch (error) {
                 console.error("Error setting key in PostgreSQL", error);
