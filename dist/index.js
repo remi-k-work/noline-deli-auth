@@ -69,11 +69,11 @@ const app = issuer({
     },
 });
 // Serve static files from the local file system
-app.use("*", serveStatic({ root: "./public" }));
+// app.use("*", serveStatic({ root: "./public" }));
 const View = () => {
     return (_jsxs("html", { children: [_jsxs("head", { children: [_jsx("title", { children: "NoLine-Deli" }), _jsx("meta", { charset: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" })] }), _jsx("body", { style: { display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }, children: _jsx("img", { src: "/logo.png", alt: "logo", width: 1024, height: 1024, style: { objectFit: "contain", maxWidth: "100%", height: "auto" } }) })] }));
 };
-app.get("/", (c) => c.html(_jsx(View, {})));
+// app.get("/", (c) => c.html(<View />));
 // Determine how to run the server based on whether it is in production or not
 // serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
 if (process.env.DATABASE_URL?.includes("localhost"))
