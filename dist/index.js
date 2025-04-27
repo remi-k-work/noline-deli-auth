@@ -14,6 +14,7 @@ import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
 // other libraries
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
+import PostgresTextStorage from "./storage/postgres-text.js";
 const MY_THEME = {
     title: "NoLine-Deli",
     favicon: "/favicon.svg",
@@ -31,7 +32,8 @@ async function getOrCreateCustomerId(customerEmail) {
 const app = issuer({
     theme: MY_THEME,
     subjects,
-    storage: MemoryStorage(),
+    storage: PostgresTextStorage(),
+    // storage: MemoryStorage(),
     // storage: PostgresStorage(),
     // Auth providers we are going to use
     providers: {
