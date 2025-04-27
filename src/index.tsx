@@ -91,7 +91,7 @@ const app = issuer({
 });
 
 // Serve static files from the local file system
-// app.use("*", serveStatic({ root: "./public" }));
+app.use("*", serveStatic({ root: "./public" }));
 
 const View = () => {
   return (
@@ -108,7 +108,7 @@ const View = () => {
   );
 };
 
-// app.get("/", (c) => c.html(<View />));
+app.get("/", (c) => c.html(<View />));
 
 // Determine how to run the server based on whether it is in production or not
 // serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
