@@ -14,6 +14,7 @@ import { CodeProvider } from "@openauthjs/openauth/provider/code";
 import { CodeUI } from "@openauthjs/openauth/ui/code";
 import { PasswordProvider } from "@openauthjs/openauth/provider/password";
 import { PasswordUI } from "@openauthjs/openauth/ui/password";
+import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
 
 // other libraries
 import { subjects } from "./subjects.js";
@@ -38,7 +39,8 @@ async function getOrCreateCustomerId(customerEmail: string) {
 const app = issuer({
   theme: MY_THEME,
   subjects,
-  storage: PostgresStorage(),
+  storage: MemoryStorage(),
+  // storage: PostgresStorage(),
 
   // Auth providers we are going to use
   providers: {
