@@ -18,10 +18,11 @@ export default function PostgresStorage(): StorageAdapter {
 
       const client = await pool.connect();
       try {
-        const result = await client.query("SELECT value FROM openauth_storage WHERE key = $1 AND (expiry IS NULL OR expiry > NOW())", [key]);
+        const row = (await client.query("SELECT value, expiry FROM openauth_storage WHERE key = $1", [key])).rows[0];
 
-        // Access the nested 'value' directly
-        return result.rows[0]?.value?.value;
+        // If entry has expired, remove it and return undefined; otherwise, return the value
+        if (row && row.expiry && row.expiry < new Date()) await client.query("DELETE FROM openauth_storage WHERE key = $1", [key]);
+        else return row.value?.value;
       } catch (error) {
         console.error("Error getting key from PostgreSQL", error);
         throw error;
@@ -66,13 +67,14 @@ export default function PostgresStorage(): StorageAdapter {
 
       const client = await pool.connect();
       try {
-        const result = await client.query("SELECT key, value FROM openauth_storage WHERE key LIKE $1 AND (expiry IS NULL OR expiry > NOW())", [
-          `${prefix}${String.fromCharCode(0x1f)}%`,
-        ]);
+        const result = await client.query("SELECT key, value, expiry FROM openauth_storage WHERE key LIKE $1", [`${prefix}${String.fromCharCode(0x1f)}%`]);
 
-        for (const row of result.rows) {
+        for (const { key, value, expiry } of result.rows) {
+          // If entry has expired, skip it
+          if (expiry && expiry < new Date()) continue;
+
           // Access the nested 'value' directly
-          yield [splitKey(row.key), row.value?.value];
+          yield [splitKey(key), value?.value];
         }
       } catch (error) {
         console.error("Error scanning keys in PostgreSQL", error);

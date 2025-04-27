@@ -10,11 +10,9 @@ import { CodeProvider } from "@openauthjs/openauth/provider/code";
 import { CodeUI } from "@openauthjs/openauth/ui/code";
 import { PasswordProvider } from "@openauthjs/openauth/provider/password";
 import { PasswordUI } from "@openauthjs/openauth/ui/password";
-import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
 // other libraries
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
-import PostgresTextStorage from "./storage/postgres-text.js";
 const MY_THEME = {
     title: "NoLine-Deli",
     favicon: "/favicon.svg",
@@ -32,9 +30,7 @@ async function getOrCreateCustomerId(customerEmail) {
 const app = issuer({
     theme: MY_THEME,
     subjects,
-    storage: PostgresTextStorage(),
-    // storage: MemoryStorage(),
-    // storage: PostgresStorage(),
+    storage: PostgresStorage(),
     // Auth providers we are going to use
     providers: {
         code: CodeProvider(CodeUI({
