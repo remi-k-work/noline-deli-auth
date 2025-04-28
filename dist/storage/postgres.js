@@ -14,11 +14,15 @@ export default function PostgresStorage() {
             const client = await pool.connect();
             try {
                 const row = (await client.query("SELECT value, expiry FROM openauth_storage WHERE key = $1", [key])).rows[0];
+                // Make sure the row exists
+                if (!row)
+                    return;
+                const { value, expiry } = row;
                 // If entry has expired, remove it and return undefined; otherwise, return the value
-                if (row && row.expiry && row.expiry < new Date())
+                if (expiry && expiry < new Date())
                     await client.query("DELETE FROM openauth_storage WHERE key = $1", [key]);
                 else
-                    return row.value?.value;
+                    return value?.value;
             }
             catch (error) {
                 console.error("Error getting key from PostgreSQL", error);
@@ -65,7 +69,6 @@ export default function PostgresStorage() {
                     // If entry has expired, skip it
                     if (expiry && expiry < new Date())
                         continue;
-                    // Access the nested 'value' directly
                     yield [splitKey(key), value?.value];
                 }
             }
