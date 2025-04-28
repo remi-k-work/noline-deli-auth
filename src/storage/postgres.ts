@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // openauth
 import { joinKey, splitKey, type StorageAdapter } from "@openauthjs/openauth/storage/storage";
 
@@ -13,7 +11,7 @@ const pool = process.env.DATABASE_URL?.includes("localhost")
 
 export default function PostgresStorage(): StorageAdapter {
   return {
-    async get(keyParts: string[]): Promise<Record<string, any> | undefined> {
+    async get(keyParts: string[]): Promise<Record<string, unknown> | undefined> {
       const key = joinKey(keyParts);
 
       const client = await pool.connect();
@@ -35,7 +33,7 @@ export default function PostgresStorage(): StorageAdapter {
       }
     },
 
-    async set(keyParts: string[], value: any, expiry?: Date): Promise<void> {
+    async set(keyParts: string[], value: unknown, expiry?: Date): Promise<void> {
       const key = joinKey(keyParts);
 
       const client = await pool.connect();
@@ -66,7 +64,7 @@ export default function PostgresStorage(): StorageAdapter {
       }
     },
 
-    async *scan(prefixParts: string[]): AsyncIterable<[string[], any]> {
+    async *scan(prefixParts: string[]): AsyncIterable<[string[], unknown]> {
       const prefix = joinKey(prefixParts);
 
       const client = await pool.connect();

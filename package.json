@@ -3,21 +3,34 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.tsx",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --report-unused-disable-directives --max-warnings 0",
+    "build": "npm run lint && tsc",
+    "start": "node dist/index.js",
+    "email": "copy .env node_modules\\react-email && email dev --dir src/emails --port 3002"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
     "@openauthjs/openauth": "^0.4.3",
+    "@react-email/components": "0.0.36",
     "hono": "^4.7.7",
     "pg": "^8.15.5",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "valibot": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
     "@types/pg": "^8.11.14",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
     "dotenv": "^16.5.0",
+    "eslint": "^9.25.1",
+    "eslint-config-next": "^15.3.1",
+    "eslint-config-prettier": "^10.1.2",
+    "next": "^15.3.1",
     "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "react-email": "4.0.7",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   }

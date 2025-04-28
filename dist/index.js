@@ -75,7 +75,6 @@ const View = () => {
 };
 app.get("/", (c) => c.html(_jsx(View, {})));
 // Determine how to run the server based on whether it is in production or not
-// serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
 if (process.env.DATABASE_URL?.includes("localhost"))
     serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
 else

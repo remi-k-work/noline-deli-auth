@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // openauth
 import { joinKey, splitKey } from "@openauthjs/openauth/storage/storage";
 // other libraries
