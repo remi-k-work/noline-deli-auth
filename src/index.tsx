@@ -100,9 +100,10 @@ const View = () => {
         <title>NoLine-Deli</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link href="./index.css" rel="stylesheet" />
       </head>
-      <body style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <img src="/logo.png" alt="logo" width={1024} height={1024} style={{ objectFit: "contain", maxWidth: "100%", height: "auto" }} />
+      <body class="flex h-screen items-center justify-center bg-white p-8">
+        <img src="./logo.png" alt="logo" width={1024} height={1024} class="h-auto max-w-full object-contain" />
       </body>
     </html>
   );

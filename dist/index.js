@@ -71,7 +71,7 @@ const app = issuer({
 // Serve static files from the local file system
 app.use("*", serveStatic({ root: "./public" }));
 const View = () => {
-    return (_jsxs("html", { children: [_jsxs("head", { children: [_jsx("title", { children: "NoLine-Deli" }), _jsx("meta", { charset: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" })] }), _jsx("body", { style: { display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }, children: _jsx("img", { src: "/logo.png", alt: "logo", width: 1024, height: 1024, style: { objectFit: "contain", maxWidth: "100%", height: "auto" } }) })] }));
+    return (_jsxs("html", { children: [_jsxs("head", { children: [_jsx("title", { children: "NoLine-Deli" }), _jsx("meta", { charset: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { href: "./index.css", rel: "stylesheet" })] }), _jsx("body", { class: "flex h-screen items-center justify-center bg-white p-8", children: _jsx("img", { src: "./logo.png", alt: "logo", width: 1024, height: 1024, class: "h-auto max-w-full object-contain" }) })] }));
 };
 app.get("/", (c) => c.html(_jsx(View, {})));
 // Determine how to run the server based on whether it is in production or not

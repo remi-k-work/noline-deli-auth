@@ -2,9 +2,10 @@
   "name": "auth",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.tsx",
+    "dev": "npm run tail && tsx watch src/index.tsx",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx --report-unused-disable-directives --max-warnings 0",
-    "build": "npm run lint && tsc",
+    "tail": "npx @tailwindcss/cli -i ./src/index.css -o ./public/index.css",
+    "build": "npm run lint && npm run tail && tsc",
     "start": "node dist/index.js",
     "email": "copy .env node_modules\\react-email && email dev --dir src/emails --port 3002"
   },
@@ -19,6 +20,7 @@
     "valibot": "^1.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.1.4",
     "@types/node": "^20.11.17",
     "@types/pg": "^8.11.14",
     "@types/react": "^19.1.2",
@@ -31,6 +33,7 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react-email": "4.0.7",
+    "tailwindcss": "^4.1.4",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   }
