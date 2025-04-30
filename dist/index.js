@@ -1,7 +1,10 @@
-import { jsx as _jsx, jsxs as _jsxs } from "hono/jsx/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/** @jsxImportSource react */
 // Load environment variables
 import "dotenv/config";
+// react
+import { renderToString } from "react-dom/server";
 // hono
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
@@ -13,6 +16,7 @@ import { PasswordUI } from "@openauthjs/openauth/ui/password";
 // other libraries
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
+import { sendPinCode } from "./emails/sender.js";
 const MY_THEME = {
     title: "NoLine-Deli",
     favicon: "/favicon.svg",
@@ -34,10 +38,16 @@ const app = issuer({
     // Auth providers we are going to use
     providers: {
         code: CodeProvider(CodeUI({
-            sendCode: async (email, code) => console.log(email, code),
+            sendCode: async (claims, code) => {
+                // Send an email with a pin code
+                await sendPinCode(claims.email, code);
+            },
         })),
         password: PasswordProvider(PasswordUI({
-            sendCode: async (email, code) => console.log(email, code),
+            sendCode: async (email, code) => {
+                // Send an email with a pin code
+                await sendPinCode(email, code);
+            },
         })),
     },
     // The success callback receives the payload when a user completes a provider’s auth flow
@@ -71,9 +81,9 @@ const app = issuer({
 // Serve static files from the local file system
 app.use("*", serveStatic({ root: "./public" }));
 const View = () => {
-    return (_jsxs("html", { children: [_jsxs("head", { children: [_jsx("title", { children: "NoLine-Deli" }), _jsx("meta", { charset: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { href: "./index.css", rel: "stylesheet" })] }), _jsx("body", { class: "flex h-screen items-center justify-center bg-white p-8", children: _jsx("img", { src: "./logo.png", alt: "logo", width: 1024, height: 1024, class: "h-auto max-w-full object-contain" }) })] }));
+    return (_jsxs("html", { children: [_jsxs("head", { children: [_jsx("title", { children: "NoLine-Deli" }), _jsx("meta", { charSet: "utf-8" }), _jsx("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), _jsx("link", { href: "./index.css", rel: "stylesheet" })] }), _jsx("body", { className: "flex h-screen items-center justify-center bg-white p-8", children: _jsx("img", { src: "./logo.png", alt: "logo", width: 1024, height: 1024, className: "h-auto max-w-full object-contain" }) })] }));
 };
-app.get("/", (c) => c.html(_jsx(View, {})));
+app.get("/", (c) => c.html(renderToString(_jsx(View, {}))));
 // Determine how to run the server based on whether it is in production or not
 if (process.env.DATABASE_URL?.includes("localhost"))
     serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));

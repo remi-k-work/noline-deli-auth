@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/** @jsxImportSource react */
 
 // Load environment variables
 import "dotenv/config";
+
+// react
+import { renderToString } from "react-dom/server";
 
 // hono
 import { serve } from "@hono/node-server";
@@ -18,6 +22,7 @@ import { PasswordUI } from "@openauthjs/openauth/ui/password";
 // other libraries
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
+import { sendPinCode } from "./emails/sender.js";
 
 const MY_THEME: Theme = {
   title: "NoLine-Deli",
@@ -44,13 +49,19 @@ const app = issuer({
   providers: {
     code: CodeProvider(
       CodeUI({
-        sendCode: async (email, code) => console.log(email, code),
+        sendCode: async (claims, code) => {
+          // Send an email with a pin code
+          await sendPinCode(claims.email, code);
+        },
       }),
     ),
 
     password: PasswordProvider(
       PasswordUI({
-        sendCode: async (email, code) => console.log(email, code),
+        sendCode: async (email, code) => {
+          // Send an email with a pin code
+          await sendPinCode(email, code);
+        },
       }),
     ),
   },
@@ -98,18 +109,18 @@ const View = () => {
     <html>
       <head>
         <title>NoLine-Deli</title>
-        <meta charset="utf-8" />
+        <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="./index.css" rel="stylesheet" />
       </head>
-      <body class="flex h-screen items-center justify-center bg-white p-8">
-        <img src="./logo.png" alt="logo" width={1024} height={1024} class="h-auto max-w-full object-contain" />
+      <body className="flex h-screen items-center justify-center bg-white p-8">
+        <img src="./logo.png" alt="logo" width={1024} height={1024} className="h-auto max-w-full object-contain" />
       </body>
     </html>
   );
 };
 
-app.get("/", (c) => c.html(<View />));
+app.get("/", (c) => c.html(renderToString(<View />)));
 
 // Determine how to run the server based on whether it is in production or not
 if (process.env.DATABASE_URL?.includes("localhost"))
