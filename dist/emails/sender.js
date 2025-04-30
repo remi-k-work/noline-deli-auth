@@ -9,7 +9,6 @@ import PinCode from "./PinCode.js";
 const TRANSPORTER = nodemailer.createTransport({
     host: process.env.TRANSPORTER_HOST,
     port: 587,
-    secure: process.env.DATABASE_URL?.includes("localhost") ? false : true,
     auth: { user: process.env.TRANSPORTER_USER, pass: process.env.TRANSPORTER_PASS },
 });
 // Send an email using the nodemailer transporter
