@@ -2,11 +2,11 @@
   "name": "auth",
   "type": "module",
   "scripts": {
-    "dev": "npm run tail && tsx watch src/index.tsx",
+    "dev": "cross-env NODE_ENV=development npm run tail && tsx watch src/index.tsx",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx --report-unused-disable-directives --max-warnings 0",
     "tail": "npx @tailwindcss/cli -i ./src/index.css -o ./public/index.css",
     "build": "npm run lint && npm run tail && tsc",
-    "start": "node dist/index.js",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
     "email": "copy .env node_modules\\react-email && email dev --dir src/emails --port 3002"
   },
   "dependencies": {
@@ -18,6 +18,8 @@
     "pg": "^8.15.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "stripe": "^18.0.0",
+    "uuid": "^11.1.0",
     "valibot": "^1.0.0"
   },
   "devDependencies": {
@@ -27,6 +29,7 @@
     "@types/pg": "^8.11.14",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.5.0",
     "eslint": "^9.25.1",
     "eslint-config-next": "^15.3.1",

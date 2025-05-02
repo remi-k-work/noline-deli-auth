@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /** @jsxImportSource react */
 
 // Load environment variables
@@ -19,6 +18,9 @@ import { CodeUI } from "@openauthjs/openauth/ui/code";
 import { PasswordProvider } from "@openauthjs/openauth/provider/password";
 import { PasswordUI } from "@openauthjs/openauth/ui/password";
 
+// prisma and db access
+import { getOrCreateAuthenticatedCustomer } from "./db/customer.js";
+
 // other libraries
 import { subjects } from "./subjects.js";
 import PostgresStorage from "./storage/postgres.js";
@@ -31,13 +33,6 @@ const MY_THEME: Theme = {
   primary: { dark: "#fcf9fa", light: "#0f172b" },
   logo: "/favicon.svg",
 };
-
-// Either get the existing customer id or create a new one
-async function getOrCreateCustomerId(customerEmail: string) {
-  // Get user from database
-  // Return user ID
-  return "123";
-}
 
 // The "issuer" creates an openauth server, a portable hono application
 const app = issuer({
@@ -77,8 +72,8 @@ const app = issuer({
         // Extract the supplied customer email from the payload
         const customerEmail = value.claims.email;
 
-        // Either get the existing customer or create a new one
-        customerId = await getOrCreateCustomerId(customerEmail);
+        // Get or create a new customer who has been authenticated successfully
+        customerId = await getOrCreateAuthenticatedCustomer(customerEmail);
         break;
       }
 
@@ -86,8 +81,8 @@ const app = issuer({
         // Extract the supplied customer email from the payload
         const customerEmail = value.email;
 
-        // Either get the existing customer or create a new one
-        customerId = await getOrCreateCustomerId(customerEmail);
+        // Get or create a new customer who has been authenticated successfully
+        customerId = await getOrCreateAuthenticatedCustomer(customerEmail);
         break;
       }
 
@@ -123,6 +118,5 @@ const View = () => {
 app.get("/", (c) => c.html(renderToString(<View />)));
 
 // Determine how to run the server based on whether it is in production or not
-if (process.env.DATABASE_URL?.includes("localhost"))
-  serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
+if (process.env.NODE_ENV !== "production") serve({ fetch: app.fetch, port: 3001 }, (info) => console.log(`Server is running on http://localhost:${info.port}`));
 else serve(app);

@@ -1,11 +1,7 @@
 // openauth
 import { joinKey, splitKey } from "@openauthjs/openauth/storage/storage";
-// other libraries
-import { Pool } from "pg";
-// Connect on module load (use ssl connection to the postgres server in production only)
-const pool = process.env.DATABASE_URL?.includes("localhost")
-    ? new Pool({ connectionString: process.env.DATABASE_URL })
-    : new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+// prisma and db access
+import pool from "../services/postgres.js";
 export default function PostgresStorage() {
     return {
         async get(keyParts) {
