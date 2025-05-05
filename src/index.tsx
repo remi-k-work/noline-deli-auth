@@ -17,6 +17,7 @@ import { CodeProvider } from "@openauthjs/openauth/provider/code";
 import { CodeUI } from "@openauthjs/openauth/ui/code";
 import { PasswordProvider } from "@openauthjs/openauth/provider/password";
 import { PasswordUI } from "@openauthjs/openauth/ui/password";
+import { GithubProvider } from "@openauthjs/openauth/provider/github";
 
 // prisma and db access
 import { getOrCreateAuthenticatedCustomer } from "./db/customer.js";
@@ -59,37 +60,36 @@ const app = issuer({
         },
       }),
     ),
+
+    github: GithubProvider({ clientID: process.env.GITHUB_PROVIDER_CLIENT_ID!, clientSecret: process.env.GITHUB_PROVIDER_CLIENT_SECRET!, scopes: ["email"] }),
   },
 
   // The success callback receives the payload when a user completes a provider’s auth flow
   success: async ({ subject }, value) => {
-    // Either the existing or a new customer id
-    let customerId: string;
+    // The extracted customer email from the payload
+    let customerEmail: string;
 
     // Determine which auth provider has been used
     switch (value.provider) {
-      case "code": {
-        // Extract the supplied customer email from the payload
-        const customerEmail = value.claims.email;
-
-        // Get or create a new customer who has been authenticated successfully
-        customerId = await getOrCreateAuthenticatedCustomer(customerEmail);
+      case "code":
+        customerEmail = value.claims.email;
         break;
-      }
 
-      case "password": {
-        // Extract the supplied customer email from the payload
-        const customerEmail = value.email;
-
-        // Get or create a new customer who has been authenticated successfully
-        customerId = await getOrCreateAuthenticatedCustomer(customerEmail);
+      case "password":
+        customerEmail = value.email;
         break;
-      }
+
+      case "github":
+        customerEmail = value.tokenset.access;
+        break;
 
       default:
         // Unrecognized auth provider
         throw new Error("Invalid auth provider!");
     }
+
+    // Get or create a new customer who has been authenticated successfully
+    const customerId = await getOrCreateAuthenticatedCustomer(customerEmail);
 
     // Once complete, issue the access tokens that a client can use
     return subject("customer", { customerId });
