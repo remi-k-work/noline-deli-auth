@@ -33,7 +33,7 @@ async function newAuthenticatedCustomer(email: string): Promise<string> {
     stripeCustomerId = stripeCustomer.id;
 
     // Create a corresponding customer record in our database; this ensures that our database and stripe are synchronized
-    await client.query('INSERT INTO "Customer" (id, "stripeCustomerId", email, name, "isTest", "updatedAt") VALUES ($1, $2, $3, \'{No Name}\', false, NOW())', [
+    await client.query('INSERT INTO "Customer" (id, "stripeCustomerId", email, name, "isTest", "updatedAt") VALUES ($1, $2, $3, $3, false, NOW())', [
       customerId,
       stripeCustomerId,
       email,
