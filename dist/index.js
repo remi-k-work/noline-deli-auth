@@ -45,7 +45,11 @@ const app = issuer({
                 await sendPinCode(email, code);
             },
         })),
-        github: GithubProvider({ clientID: process.env.GITHUB_PROVIDER_CLIENT_ID, clientSecret: process.env.GITHUB_PROVIDER_CLIENT_SECRET, scopes: ["email"] }),
+        github: GithubProvider({
+            clientID: process.env.GITHUB_PROVIDER_CLIENT_ID,
+            clientSecret: process.env.GITHUB_PROVIDER_CLIENT_SECRET,
+            scopes: ["user:email"],
+        }),
     },
     // The success callback receives the payload when a user completes a provider’s auth flow
     success: async ({ subject }, value) => {
@@ -60,7 +64,19 @@ const app = issuer({
                 customerEmail = value.email;
                 break;
             case "github":
-                customerEmail = value.tokenset.access;
+                // With this access token, we will be able to make authenticated requests as the logged-in user
+                const accessToken = value.tokenset.access;
+                // Fetch private emails from github (requires 'user:email' scope)
+                const privateEmailsResponse = await fetch("https://api.github.com/user/emails", {
+                    headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
+                });
+                if (!privateEmailsResponse.ok)
+                    throw new Error(`Failed to fetch private emails: ${privateEmailsResponse.statusText}`);
+                const privateEmails = await privateEmailsResponse.json();
+                // Find the primary and verified private email and use it as our customer email
+                customerEmail = privateEmails.find((email) => email.primary && email.verified)?.email;
+                if (!customerEmail)
+                    throw new Error("No primary and verified email found on GitHub account!");
                 break;
             default:
                 // Unrecognized auth provider
